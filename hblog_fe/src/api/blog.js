@@ -4,8 +4,14 @@ import { dataResolver, errorHandler } from '@/plugins/axios'
 
 const blogApi = {}
 
-blogApi.getBlogs = () => {
-  Vue.axios.get('/server/api/blog/article', {
+blogApi.getBlogList = () => {
+  return Vue.axios.get('/server/api/blog/article', {
+    withCredentials: true
+  }).then(dataResolver).catch(errorHandler)
+}
+
+blogApi.getBlogDetail = id => {
+  return Vue.axios.get(`/server/api/blog/article/${id}`, {
     withCredentials: true
   }).then(dataResolver).catch(errorHandler)
 }

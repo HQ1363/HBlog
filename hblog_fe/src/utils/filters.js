@@ -13,6 +13,13 @@ export const statusColor = {
   3: '#f56c6c'
 }
 
+// 博文状态
+export const blogStatus = {
+  1: '草稿箱',
+  2: '已发布',
+  3: '已下线'
+}
+
 export const permissionTypeText = {
   0: 'code',
   1: 'token',
@@ -29,7 +36,8 @@ const filters = {
   'applyStatus': (key) => { return applyStatus[key] },
   'statusColor': (key) => { return statusColor[key] },
   'permissionTypeText': (key) => { return permissionTypeText[key] },
-  'branchStatusText': (key) => { return branchStatusText[key] }
+  'branchStatusText': (key) => { return branchStatusText[key] },
+  'blogStatus': (key) => { return blogStatus[key] }
 }
 
 export default (Vue) => {

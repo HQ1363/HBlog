@@ -11,11 +11,11 @@ function resolve (dir) {
   return path.join(__dirname, dir)
 }
 const proxyTargetMap = {
-  prod: 'http://172.16.176.134:8000',
-  dev: 'http://172.16.176.134:8000',
+  production: 'http://172.16.176.134:8000',
+  development: 'http://172.16.176.134:8000',
   test: 'http://192.168.11.178:3001'
 }
-let proxyTarget = proxyTargetMap[process.env.API_TYPE] || proxyTargetMap.prod
+let proxyTarget = proxyTargetMap[process.env.API_TYPE] || proxyTargetMap.production
 let publicPath = process.env.NODE_ENV === 'production' ? '/' : '/'
 let dllPublishPath = '/vendor'
 module.exports = {
@@ -87,6 +87,22 @@ module.exports = {
       .set('@store', resolve('src/store'))
       .set('@utils', resolve('src/utils'))
       .set('@views', resolve('src/views'))
+
+    // 如果使用多页面打包，使用vue inspect --plugins查看html是否在结果数组中
+    config.plugin('html').tap(args => {
+      // 修复 Lazy loading routes Error
+      args[0].chunksSortMode = 'none'
+      return args
+    })
+
+    // 打包分析
+    if (process.env.NODE_ENV === 'production') {
+      config.plugin('webpack-report').use(BundleAnalyzerPlugin, [
+        {
+          analyzerMode: 'static'
+        }
+      ])
+    }
   },
   // CSS 相关选项
   css: {
@@ -117,9 +133,9 @@ module.exports = {
   // 配置 webpack-dev-server 行为。
   devServer: {
     disableHostCheck: true,
-    open: true, // 自动打开浏览器
+    open: false, // 自动打开浏览器
     host: '0.0.0.0',
-    port: 8080,
+    port: 8000,
     https: false,
     hot: true, // 热加载
     // hotOnly: false,
