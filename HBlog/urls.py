@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 from rest_framework.documentation import include_docs_urls
+from rest_framework.authtoken import views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,6 +25,8 @@ from blog.views import user_login, user_logout, query_user_profile
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    # get token
+    url(r'^api-token-auth/', views.obtain_auth_token),
     url(r'^api/user/login$', user_login),
     url(r'^api/user/logout$', user_logout),
     url(r'^api/user/profile$', query_user_profile),

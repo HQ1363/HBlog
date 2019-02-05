@@ -13,6 +13,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from comm.utils.common import json_dumps
@@ -45,7 +46,8 @@ def query_user_profile(request):
 def user_login(request):
     """ 用户登录 """
     if request.user.is_authenticated:
-        return Response(data=dict(status="success"), status=status.HTTP_200_OK)
+        token, _ = Token.objects.get_or_create(user=request.user)
+        return Response(data=dict(status="success", token=token.key), status=status.HTTP_200_OK)
     username = request.POST.get('username')
     password = request.POST.get('password')
     if not username or not password:
@@ -55,7 +57,8 @@ def user_login(request):
         return Response(data=dict(status="failure", errmsg=u"登录失败"), status=status.HTTP_401_UNAUTHORIZED)
     try:
         login(request, user)
-        return Response(data=dict(status="success"), status=status.HTTP_200_OK)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response(data=dict(status="success", token=token.key), status=status.HTTP_200_OK)
     except ValueError:
         print_exc()
     return Response(data=dict(status="failure", errmsg=u"登录失败"), status=status.HTTP_401_UNAUTHORIZED)
