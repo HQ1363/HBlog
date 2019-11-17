@@ -1,0 +1,44 @@
+version: "3"
+services:
+  db:
+    # mysql镜像，最好先拉取到本地
+    image: mysql:5.7
+    environment:
+      - MYSQL_HOST=localhost
+      - MYSQL_DATABASE=docker
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=wyzane
+      - MYSQL_ROOT_PASSWORD=wyzane
+    volumes:
+      # 将宿主机与容器中的文件映射
+      - /home/wyzane/pyprojects/db:/var/lib/mysql
+    # 若容器运行出现问题，会自动重启容器
+    restart: always
+
+  polestar:
+    build: .
+    container_name: polestar
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./blog:/blog
+      - /tmp/logs:/tmp
+    # 执行命令，有多种格式
+    command: bash start.sh
+    links:
+      - db
+    depends_on:
+      - db
+    restart: always
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./blog/static:/usr/share/nginx/html/static:ro
+    links:
+      - polestar
+    depends_on:
+      - polestar
+    restart: always
