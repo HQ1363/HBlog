@@ -28,3 +28,5 @@ venv
 polestar/settings_local.py
 celerybeat.pid
 celerybeat-schedule
+hblog_fe/node_modules
+hblog_fe/dist
