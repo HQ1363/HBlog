@@ -1,4 +1,59 @@
 import Vue from 'vue'
-import { Button } from 'element-ui'
+import {
+  Button,
+  Table,
+  Menu,
+  Backtop,
+  Aside,
+  Card,
+  Upload,
+  Alert,
+  Container,
+  Submenu,
+  Breadcrumb,
+  Col,
+  Row,
+  Dialog,
+  Divider,
+  Icon,
+  Popover,
+  Tag,
+  DatePicker,
+  Footer,
+  Header,
+  Main,
+  Form,
+  FormItem,
+  Select,
+  Switch,
+  MenuItem
+} from 'element-ui'
 
 Vue.use(Button)
+Vue.use(Table)
+Vue.use(Menu)
+Vue.use(Backtop)
+Vue.use(Aside)
+Vue.use(Card)
+Vue.use(Upload)
+Vue.use(Alert)
+Vue.use(Menu)
+Vue.use(Container)
+Vue.use(Submenu)
+Vue.use(Breadcrumb)
+Vue.use(Col)
+Vue.use(Row)
+Vue.use(Dialog)
+Vue.use(Divider)
+Vue.use(Icon)
+Vue.use(Popover)
+Vue.use(Tag)
+Vue.use(DatePicker)
+Vue.use(Footer)
+Vue.use(Header)
+Vue.use(Main)
+Vue.use(Form)
+Vue.use(FormItem)
+Vue.use(Select)
+Vue.use(Switch)
+Vue.use(MenuItem)
