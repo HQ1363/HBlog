@@ -104,7 +104,7 @@ module.exports = {
 
     // 为所有的 CSS 及其预处理文件开启 CSS Modules。
     // 这个选项不会影响 `*.vue` 文件。
-    modules: false
+    requireModuleExtension: true
   },
 
   // 在生产环境下为 Babel 和 TypeScript 使用 `thread-loader`
@@ -118,11 +118,12 @@ module.exports = {
   // 配置 webpack-dev-server 行为。
   devServer: {
     disableHostCheck: true,
-    open: process.platform === 'darwin',
-    host: 'localhost',
+    open: true, // 自动打开浏览器
+    host: '0.0.0.0',
     port: 8080,
     https: false,
-    hotOnly: false,
+    hot: true, // 热加载
+    // hotOnly: false,
     // eslint-disable-next-line no-dupe-keys
     // 查阅 https://github.com/vuejs/vue-docs-zh-cn/blob/master/vue-cli/cli-service.md#配置代理
     proxy: {

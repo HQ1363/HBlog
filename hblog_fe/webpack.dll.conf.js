@@ -1,6 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 // dll文件存放的目录
 const dllPath = 'public/vendor'
@@ -20,8 +20,9 @@ module.exports = {
   },
   plugins: [
     // 清除之前的dll文件
-    new CleanWebpackPlugin(['*.*'], {
-      root: path.join(__dirname, dllPath)
+    new CleanWebpackPlugin({
+      root: path.join(__dirname, dllPath),
+      cleanOnceBeforeBuildPatterns: ['*.*']
     }),
     // 设置环境变量
     new webpack.DefinePlugin({

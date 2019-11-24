@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'Home',
+  name: 'Index',
   data () {
     return {
       pageName: '这是访客页面'
