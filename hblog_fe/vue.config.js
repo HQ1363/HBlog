@@ -69,6 +69,25 @@ module.exports = {
       .rule('svg')
       .exclude.add(resolve('src/icons'))
       .end()
+
+    // 修复HMR
+    config.resolve.symlinks(true)
+
+    // 添加别名
+    config.resolve.alias
+      .set('vue$', 'vue/dist/vue.esm.js')
+      .set('@', resolve('src'))
+      .set('@apis', resolve('src/apis'))
+      .set('@assets', resolve('src/assets'))
+      .set('@scss', resolve('src/assets/scss'))
+      .set('@components', resolve('src/components'))
+      .set('@middlewares', resolve('src/middlewares'))
+      .set('@mixins', resolve('src/mixins'))
+      .set('@plugins', resolve('src/plugins'))
+      .set('@router', resolve('src/router'))
+      .set('@store', resolve('src/store'))
+      .set('@utils', resolve('src/utils'))
+      .set('@views', resolve('src/views'))
   },
   // CSS 相关选项
   css: {
