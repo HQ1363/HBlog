@@ -26,6 +26,7 @@
     "@vue/cli-service": "^4.0.0",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "1.0.0-beta.29",
+    "axios": "^0.18.0",
     "babel-eslint": "^10.0.3",
     "babel-plugin-component": "^1.1.1",
     "chromedriver": "76",
@@ -35,6 +36,7 @@
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
     "lint-staged": "^9.4.2",
+    "vue-cli-plugin-axios": "^0.0.4",
     "vue-cli-plugin-element": "^1.0.1",
     "vue-template-compiler": "^2.6.10"
   },
