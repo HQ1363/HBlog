@@ -26,9 +26,26 @@ import {
   FormItem,
   Select,
   Switch,
-  MenuItem
+  MenuItem,
+  TableColumn,
+  Pagination,
+  Avatar,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  Input,
+  Option,
+  TabPane,
+  Tabs
 } from 'element-ui'
 
+Vue.use(TabPane)
+Vue.use(Tabs)
+Vue.use(Option)
+Vue.use(Input)
+Vue.use(Dropdown)
+Vue.use(DropdownMenu)
+Vue.use(DropdownItem)
 Vue.use(Button)
 Vue.use(Table)
 Vue.use(Menu)
@@ -57,3 +74,6 @@ Vue.use(FormItem)
 Vue.use(Select)
 Vue.use(Switch)
 Vue.use(MenuItem)
+Vue.use(TableColumn)
+Vue.use(Pagination)
+Vue.use(Avatar)

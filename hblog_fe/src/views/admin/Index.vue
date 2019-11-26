@@ -2,15 +2,14 @@
   <el-container class="admin-page">
     <el-container>
       <template>
-        <el-aside width="250px" id="admin-menu">
-          <AdminMenu />
+        <el-aside id="admin-menu" style="max-width: 250px !important; width: auto !important;">
+          <AdminMenu :isCollapse="isCollapse" />
         </el-aside>
         <el-container>
           <el-header id="admin-header">
-            <AdminHeader />
+            <AdminHeader @handlerCollapseChange="handlerCollapseChange" :isCollapse="isCollapse" />
           </el-header>
           <el-main id="admin-main">
-            <div>这里是管理后台页面主体</div>
             <!-- 顶层admin page router-view -->
             <router-view></router-view>
           </el-main>
@@ -31,6 +30,11 @@ import AdminHeader from '@components/AdminHeader'
 
 export default {
   name: 'Index',
+  data () {
+    return {
+      isCollapse: false
+    }
+  },
   components: {
     AdminMenu,
     AdminFooter,
@@ -45,6 +49,10 @@ export default {
   computed: {
   },
   methods: {
+    handlerCollapseChange (val) {
+      console.log('value: ', this.isCollapse)
+      this.isCollapse = val
+    }
   }
 }
 </script>
@@ -60,9 +68,13 @@ export default {
   #admin-menu {
     background: #545c64;
   }
+  #admin-main {
+    padding: 0 0 !important;
+  }
   #admin-header {
     color: white;
     background: #545c64;
-    height: 40px !important;
+    height: 56px !important;
+    padding: 0 0 !important;
   }
 </style>
