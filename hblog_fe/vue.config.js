@@ -1,5 +1,4 @@
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const path = require('path')
 const webpack = require('webpack')
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin')
@@ -12,9 +11,9 @@ function resolve (dir) {
   return path.join(__dirname, dir)
 }
 const proxyTargetMap = {
-  prod: 'https://xxx.xxx.com/',
-  randy: 'http://47.105.71.81:3306',
-  peter: 'http://192.168.11.178:3001'
+  prod: 'http://172.16.176.134:8000',
+  dev: 'http://172.16.176.134:8000',
+  test: 'http://192.168.11.178:3001'
 }
 let proxyTarget = proxyTargetMap[process.env.API_TYPE] || proxyTargetMap.prod
 let publicPath = process.env.NODE_ENV === 'production' ? '/' : '/'
@@ -127,11 +126,11 @@ module.exports = {
     // eslint-disable-next-line no-dupe-keys
     // 查阅 https://github.com/vuejs/vue-docs-zh-cn/blob/master/vue-cli/cli-service.md#配置代理
     proxy: {
-      '/api': {
+      '/server': {
         target: proxyTarget,
         changeOrigin: true,
         pathRewrite: {
-          '^/api': ''
+          '^/server': ''
         }
       }
     },

@@ -2,7 +2,7 @@
   <el-menu
     router
     :collapse="isCollapse"
-    default-active="/admin/category/list"
+    default-active="/admin/document"
     background-color="#545c64"
     text-color="#fff"
     @open="handleOpen"
@@ -15,13 +15,15 @@
     <template v-for="(item, index) in menu">
       <el-menu-item v-if="!item.subMenu" :index="item.index" :key="index" style="padding: 0 0 !important;">
         <i :class="item.icon"></i>
-        <span slot="title">{{ item.name }}</span>
+        <span>{{ item.name }}</span>
       </el-menu-item>
       <el-submenu v-else :key="index" :index="item.index">
-        <i :class="item.icon"></i>
-        <span slot="title">{{ item.name }}</span>
-        <el-menu-item v-for="(subItem, subIndex) in item.subMenu" :index="subItem.index" :key="subIndex">
-          {{ subItem.name }}
+        <template slot="title">
+          <i :class="item.icon"></i>
+          <span>{{ item.name }}</span>
+        </template>
+        <el-menu-item v-for="(subItem, subIndex) in item.subMenu" :index="subItem.index" :key="subIndex" style="min-width: auto !important; padding: 0 0 !important;">
+          <span>{{ subItem.name }}</span>
         </el-menu-item>
       </el-submenu>
     </template>
@@ -40,21 +42,33 @@ export default {
     return {
       menu: [
         {
-          icon: 'el-icon-menu',
-          name: '分类管理',
-          index: '/admin/category'
-        }, {
-          icon: 'el-icon-discount',
-          name: '标签管理',
-          index: '/admin/tag'
-        }, {
-          icon: 'el-icon-chat-dot-round',
-          name: '评论管理',
-          index: '/admin/comment'
+          icon: 'el-icon-odometer',
+          name: '仪表',
+          index: '/admin/statistic'
         }, {
           icon: 'el-icon-document',
-          name: '博文管理',
-          index: '/admin/blog'
+          name: '文章',
+          index: '/admin/document'
+        }, {
+          icon: 'el-icon-user',
+          name: '用户',
+          index: '/admin/user',
+          subMenu: [
+            {
+              icon: 'el-icon-camera',
+              name: '相册',
+              index: '/admin/user/photos'
+            },
+            {
+              icon: 'el-icon-postcard',
+              name: '主页',
+              index: '/admin/user/page'
+            }
+          ]
+        }, {
+          icon: 'el-icon-setting',
+          name: '系统',
+          index: '/admin/system'
         }
       ]
     }

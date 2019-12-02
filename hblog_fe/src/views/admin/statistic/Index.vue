@@ -1,10 +1,10 @@
 <template>
-  <div>这里是分类主页</div>
+  <div>这里是统计报表页面</div>
 </template>
 
 <script>
 export default {
-  name: 'Category'
+  name: 'Index'
 }
 </script>
 

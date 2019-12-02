@@ -22,6 +22,18 @@ export function checkType (object) {
   return Object.prototype.toString.call(object)
 }
 
+export function goLogin () {
+  window.location.href = 'http://www.hblog.com:8080/login'
+}
+
+export function goLoginOut () {
+  window.location.href = 'http://www.hblog.com:8080/logout'
+}
+
+export function goForbidden () {
+  window.location.href = 'http://www.hblog.com:8080/forbidden'
+}
+
 export function getCurrentDatetime () {
   let now = new Date()
   let year = now.getFullYear()
