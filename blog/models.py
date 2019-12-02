@@ -55,11 +55,25 @@ class Tag(ModelBase):
 
 class Blog(ModelBase):
     """ 博文 """
+    STATUS_DRAFT = 1
+    STATUS_PUBLISH = 2
+    STATUS_OFFLINE = 3
+
+    STATUS_TEXT = {
+        STATUS_DRAFT: '草稿箱',
+        STATUS_PUBLISH: '发布中',
+        STATUS_OFFLINE: '已下线'
+    }
+
     title = models.CharField(verbose_name='标题', max_length=80)
     author = models.CharField(verbose_name='作者', max_length=32)
     content = models.TextField(verbose_name='博客正文')
     category = models.ForeignKey(Category, verbose_name='分类')
     tags = models.ManyToManyField(Tag, verbose_name='标签')
+    status = models.SmallIntegerField(verbose_name='状态', max_length=3, default=STATUS_PUBLISH)
+    commentable = models.BooleanField(verbose_name='可评论', default=True)
+    summary = models.CharField(verbose_name='文章摘要', max_length=2048, null=True)
+    visitors = models.BigIntegerField(verbose_name='访问量', max_length=10, default=0)
 
     class Meta:
         ordering = ('-created_time', )
