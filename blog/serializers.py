@@ -123,4 +123,4 @@ class BlogSerializer(BaseSerializer):
 
     @staticmethod
     def get_comments(obj):
-        return "not implements"
+        return ['test comment', 'test sum']

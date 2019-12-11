@@ -68,7 +68,7 @@ class Blog(ModelBase):
     title = models.CharField(verbose_name='标题', max_length=80)
     author = models.CharField(verbose_name='作者', max_length=32)
     content = models.TextField(verbose_name='博客正文')
-    category = models.ForeignKey(Category, verbose_name='分类')
+    categories = models.ManyToManyField(Category, verbose_name='分类')
     tags = models.ManyToManyField(Tag, verbose_name='标签')
     status = models.SmallIntegerField(verbose_name='状态', max_length=3, default=STATUS_PUBLISH)
     commentable = models.BooleanField(verbose_name='可评论', default=True)
