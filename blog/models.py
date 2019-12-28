@@ -70,10 +70,10 @@ class Blog(ModelBase):
     content = models.TextField(verbose_name='博客正文')
     categories = models.ManyToManyField(Category, verbose_name='分类')
     tags = models.ManyToManyField(Tag, verbose_name='标签')
-    status = models.SmallIntegerField(verbose_name='状态', max_length=3, default=STATUS_PUBLISH)
+    status = models.SmallIntegerField(verbose_name='状态', default=STATUS_PUBLISH)
     commentable = models.BooleanField(verbose_name='可评论', default=True)
     summary = models.CharField(verbose_name='文章摘要', max_length=2048, null=True)
-    visitors = models.BigIntegerField(verbose_name='访问量', max_length=10, default=0)
+    visitors = models.BigIntegerField(verbose_name='访问量', default=0)
 
     class Meta:
         ordering = ('-created_time', )
@@ -88,7 +88,7 @@ class Comment(ModelBase):
     """
     评论
     """
-    blog = models.ForeignKey(Blog, verbose_name='博客')
+    blog = models.ForeignKey(Blog, verbose_name='博客', related_name="comments")
     name = models.CharField(verbose_name='称呼', max_length=64)
     email = models.EmailField(verbose_name='邮箱')
     comment = models.ForeignKey(u'self', related_name=u'comments', verbose_name='评论的评论', null=True)
