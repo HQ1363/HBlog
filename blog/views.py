@@ -4,15 +4,70 @@ from __future__ import unicode_literals
 import logging
 
 from rest_framework import status
+from traceback import print_exc
 from django.http.response import HttpResponse
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import User
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from comm.utils.common import json_dumps
 from serializers import BlogSerializer, TagSerializer, CategorySerializer, CommentSerializer
 from models import Blog, Comment, Category, Tag
 
 logger = logging.getLogger(__name__)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+def query_user_profile(request):
+    """ 查询登录用户信息 """
+    if not request.user:
+        return Response(data=dict(status="failure", errmsg=u"请先完成登录"), status=status.HTTP_401_UNAUTHORIZED)
+    result = dict(
+        username=request.user.username,
+        email=request.user.email,
+        is_super=request.user.is_superuser,
+        is_staff=request.user.is_staff,
+        is_active=request.user.is_active,
+        last_login=request.user.last_login
+    )
+    return Response(data=result, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_login(request):
+    """ 用户登录 """
+    if request.user.is_authenticated:
+        return Response(data=dict(status="success"), status=status.HTTP_200_OK)
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if not username or not password:
+        return Response(data=dict(status="failure", errmsg=u"缺少必要的参数"), status=status.HTTP_400_BAD_REQUEST)
+    user = authenticate(request, username=username, password=password)
+    if not user:
+        return Response(data=dict(status="failure", errmsg=u"登录失败"), status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        login(request, user)
+        return Response(data=dict(status="success"), status=status.HTTP_200_OK)
+    except ValueError:
+        print_exc()
+    return Response(data=dict(status="failure", errmsg=u"登录失败"), status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+def user_logout(request):
+    """ 用户登出 """
+    logout(request)
+    return Response(data=dict(status="success"), status=status.HTTP_200_OK)
 
 
 # Create your views here.

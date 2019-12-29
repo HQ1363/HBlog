@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
 
 from comm.utils.common import json_loads
@@ -20,6 +22,17 @@ class JSONField(models.TextField):
 
 
 # Create your models here.
+class UserProfile(models.Model):
+    """ 扩展user表字段 """
+    user = models.OneToOneField(User)
+
+    def __str__(self):
+        return self.user.username
+
+    def __unicode__(self):
+        return self.user.username
+
+
 class ModelBase(models.Model):
     """ the model base """
     id = models.AutoField(primary_key=True)
@@ -103,3 +116,11 @@ class Comment(ModelBase):
         return self.content
 
     __str__ = __unicode__
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+
+post_save.connect(create_user_profile, sender=User)
