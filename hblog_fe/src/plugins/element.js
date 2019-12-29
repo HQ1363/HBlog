@@ -36,9 +36,23 @@ import {
   Input,
   Option,
   TabPane,
-  Tabs
+  Tabs,
+  Drawer,
+  Checkbox,
+  CheckboxGroup,
+  RadioButton,
+  RadioGroup,
+  Message,
+  MessageBox,
+  Loading,
+  Notification
 } from 'element-ui'
 
+Vue.use(RadioGroup)
+Vue.use(RadioButton)
+Vue.use(CheckboxGroup)
+Vue.use(Checkbox)
+Vue.use(Drawer)
 Vue.use(TabPane)
 Vue.use(Tabs)
 Vue.use(Option)
@@ -77,3 +91,11 @@ Vue.use(MenuItem)
 Vue.use(TableColumn)
 Vue.use(Pagination)
 Vue.use(Avatar)
+
+Vue.prototype.$loading = Loading.service
+Vue.prototype.$msgbox = MessageBox
+Vue.prototype.$alert = MessageBox.alert
+Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$prompt = MessageBox.prompt
+Vue.prototype.$notify = Notification
+Vue.prototype.$message = Message

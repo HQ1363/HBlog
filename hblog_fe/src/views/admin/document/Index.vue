@@ -1,7 +1,7 @@
 <template>
-  <div style="width: 100%; height: 100%; display: block">
-    <el-tabs type="border-card">
-      <el-tab-pane>
+  <div style="width: 100%; height: 100%; display: block; position: relative">
+    <el-tabs type="border-card" style="min-height: calc(100% - 10px)" v-model="activeTab" @tab-click="handlerTabChange">
+      <el-tab-pane name="blogList">
         <span slot="label"><i class="el-icon-tickets" style="margin-right: 3px"></i>博文列表</span>
         <el-form :inline="true" :model="formInline" style="text-align: left">
           <el-form-item label="关键词">
@@ -40,6 +40,9 @@
             prop="status"
             label="状态"
             width="180">
+            <template slot-scope="scope">
+              {{ scope.row.status | blogStatus }}
+            </template>
           </el-table-column>
           <el-table-column
             prop="categories"
@@ -68,19 +71,19 @@
             width="80"
             label="评论">
             <template slot-scope="scope">
-              <el-button type="warning" size="mini" round>{{ scope.row.comments }}</el-button>
+              <el-button type="warning" size="mini" round>{{ scope.row.comments.length }}</el-button>
             </template>
           </el-table-column>
           <el-table-column
-            prop="visit"
+            prop="visitors"
             width="80"
             label="访问">
             <template slot-scope="scope">
-              <el-button type="info" size="mini" round>{{ scope.row.visit }}</el-button>
+              <el-button type="info" size="mini" round>{{ scope.row.visitors }}</el-button>
             </template>
           </el-table-column>
           <el-table-column
-            prop="date"
+            prop="created_time"
             label="发布时间"
             width="180">
           </el-table-column>
@@ -96,7 +99,11 @@
               <el-button
                 size="mini"
                 type="primary"
-                @click="handleDelete(scope.$index, scope.row)">设置</el-button>
+                @click="handleSetting(scope.$index, scope.row)">设置</el-button>
+              <el-button
+                size="mini"
+                type="info"
+                @click="handleSetting(scope.$index, scope.row)">查看</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -112,20 +119,20 @@
           </el-pagination>
         </div>
       </el-tab-pane>
-      <el-tab-pane>
+      <el-tab-pane name="addBlog">
         <span slot="label"><i class="el-icon-document-add" style="margin-right: 3px"></i>新增博文</span>
         <div>
           <el-input
             type="text"
             placeholder="请输入文章标题"
-            v-model="newAddBlog.title"
+            v-model="blogForm.title"
             maxlength="100"
             show-word-limit
           />
         </div>
         <el-divider />
         <div class="mavonEditor">
-          <mavon-editor v-model="newAddBlog.content" :ishljs="true" style="z-index: 3" />
+          <mavon-editor v-model="blogForm.content" :ishljs="true" style="z-index: 3" />
         </div>
         <el-divider />
         <div style="text-align: left; margin-top: 15px; display: flex; align-items: center">
@@ -135,24 +142,25 @@
           <div style="display: inline-block">
             <el-tag
               :key="tag"
-              v-for="(tag, index) in newAddBlog.tags"
+              v-for="(tag, index) in blogForm.tags"
               closable
               :disable-transitions="false"
-              :style="{ marginRight: index !== newAddBlog.tags.length ? '10px' : '0px' }"
+              :style="{ marginRight: index !== blogForm.tags.length ? '10px' : '0px' }"
               @close="handleNewAddTagClose(tag)">
               {{tag}}
             </el-tag>
             <el-input
               class="input-new-tag"
-              v-if="newAddBlog.newAddTagVisible"
-              v-model="newAddBlog.newAddTagValue"
+              v-if="blogForm.newAddTagVisible"
+              v-model="blogForm.newAddTagValue"
               ref="saveTagInput"
               size="small"
+              :style="{ marginRight: blogForm.tags.length > 0 ? '10px' : '0px' }"
               @keyup.enter.native="handleNewAddTagInputConfirm"
               @blur="handleNewAddTagInputConfirm"
             >
             </el-input>
-            <el-button v-else class="button-new-tag" size="small" @click="showNewAddTagInput">+ New Tag</el-button>
+            <el-button v-else class="button-new-tag" size="small" :style="{ marginRight: blogForm.tags.length > 0 ? '10px' : '0px' }" @click="showNewAddTagInput">+ New Tag</el-button>
           </div>
         </div>
         <el-divider />
@@ -160,7 +168,7 @@
           <div style="display: inline-block"><span>分类管理：</span></div>
           <div style="display: inline-block">
             <el-select
-              v-model="newAddBlog.categories"
+              v-model="blogForm.categories"
               multiple
               filterable
               allow-create
@@ -178,20 +186,93 @@
         </div>
         <el-divider />
         <div style="text-align: right">
-          <el-button type="primary">发布博客</el-button>
-          <el-button type="info">存为草稿</el-button>
+          <el-button type="primary" @click="submitOrUpdateBlog('publish')">发布博客</el-button>
+          <el-button type="info" @click="submitOrUpdateBlog('draft')">存为草稿</el-button>
         </div>
       </el-tab-pane>
     </el-tabs>
+    <h-drawer
+      title="文章设置"
+      :visible.sync="openDrawer"
+      :showClose="false"
+      :modal="false"
+      size="25%"
+      :append-to-body="false"
+      ref="drawer"
+      :modal-append-to-body="false">
+      <div class="drawer-content">
+        <el-form :model="blogForm">
+          <el-form-item label="标题" :label-width="blogForm.labelWidth">
+            <el-input v-model="blogForm.title" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="摘要" :label-width="blogForm.labelWidth">
+            <el-input type="textarea" v-model="blogForm.summary" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="类别" :label-width="blogForm.labelWidth">
+            <el-checkbox-group v-model="blogForm.categories">
+              <el-checkbox label="美食/餐厅线上活动" name="type"></el-checkbox>
+              <el-checkbox label="地推活动" name="type"></el-checkbox>
+              <el-checkbox label="线下主题活动" name="type"></el-checkbox>
+              <el-checkbox label="单纯品牌曝光" name="type"></el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+          <div class="draw-tags">
+            <label>标签</label>
+            <el-tag
+              :key="tag"
+              v-for="(tag, index) in blogForm.tags"
+              closable
+              :disable-transitions="false"
+              :style="{ marginRight: index !== blogForm.tags.length ? '10px' : '0px', marginTop: '10px' }"
+              @close="handleNewAddTagClose(tag)">
+              {{tag}}
+            </el-tag>
+            <el-input
+              class="input-new-tag"
+              v-if="blogForm.newAddTagVisible"
+              v-model="blogForm.newAddTagValue"
+              ref="saveTagInput"
+              size="small"
+              :style="{ marginRight: blogForm.tags.length > 0 ? '10px' : '0px', marginTop: '10px' }"
+              @keyup.enter.native="handleNewAddTagInputConfirm"
+              @blur="handleNewAddTagInputConfirm"
+            >
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small" :style="{ marginRight: blogForm.tags.length > 0 ? '10px' : '0px', marginTop: '10px' }" @click="showNewAddTagInput">+ New Tag</el-button>
+          </div>
+          <el-form-item label="更新状态">
+            <el-radio-group v-model="blogForm.status" size="medium">
+              <el-radio-button label="发布上线" ></el-radio-button>
+              <el-radio-button label="存为草稿"></el-radio-button>
+              <el-radio-button label="归档废弃"></el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="开启评论">
+            <el-switch v-model="blogForm.commentTable"></el-switch>
+          </el-form-item>
+          <el-form-item label="是否置顶">
+            <el-switch v-model="blogForm.isTop"></el-switch>
+          </el-form-item>
+        </el-form>
+        <div class="drawer-footer">
+          <el-button @click="() => {}">取 消</el-button>
+          <el-button type="primary" @click="$refs.drawer.closeDrawer()">确 定</el-button>
+        </div>
+      </div>
+    </h-drawer>
   </div>
 </template>
 
 <script>
 
 import blogAPi from '@/api/blog'
+import HDrawer from '@/components/HDrawer'
 
 export default {
   name: 'Blog',
+  components: {
+    HDrawer
+  },
   computed: {
     initCategories () {
       return [{
@@ -210,17 +291,23 @@ export default {
     }
   },
   created () {
-    blogAPi.getBlogs()
+    this.queryBlogList()
   },
   data () {
     return {
-      newAddBlog: {
+      activeTab: 'blogList',
+      blogForm: {
+        labelWidth: '50px',
         title: '',
         content: '',
         tags: [],
         categories: [],
         newAddTagVisible: false,
-        newAddTagValue: ''
+        newAddTagValue: '',
+        status: true,
+        commentTable: true,
+        isTop: false,
+        summary: ''
       },
       formInline: {
         keyword: '',
@@ -237,205 +324,42 @@ export default {
         visit: 100,
         date: '2016-05-02',
         id: 2
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 1
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 4
-      }, {
-        title: '测试数据',
-        tags: ['Python', 'Java', 'Node', 'H5', 'Go'],
-        categories: ['前端', '博客'],
-        status: 'publish',
-        comments: 10,
-        visit: 100,
-        date: '2016-05-02',
-        id: 3
       }],
+      openDrawer: false,
       pageNum: 1,
       pageSize: 20
     }
   },
   methods: {
+    async queryBlogList () {
+      const blogList = await blogAPi.getBlogList()
+      this.tableData = blogList.results
+    },
     handleNewAddTagClose (tag) {
-      this.newAddBlog.tags.splice(this.newAddBlog.tags.indexOf(tag), 1)
+      this.blogForm.tags.splice(this.blogForm.tags.indexOf(tag), 1)
     },
     showNewAddTagInput () {
-      this.newAddBlog.newAddTagVisible = true
+      this.blogForm.newAddTagVisible = true
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
     handleNewAddTagInputConfirm () {
-      let inputValue = this.newAddBlog.newAddTagValue
+      let inputValue = this.blogForm.newAddTagValue
       if (inputValue) {
-        this.newAddBlog.tags.push(inputValue)
+        this.blogForm.tags.push(inputValue)
       }
-      this.newAddBlog.newAddTagVisible = false
-      this.newAddBlog.newAddTagValue = ''
+      this.blogForm.newAddTagVisible = false
+      this.blogForm.newAddTagValue = ''
     },
     onSubmit () {
       console.log('submit!')
     },
     filterTag (value, row) {
       return row.tag === value
+    },
+    handlerTabChange (tab, event) {
+      this.activeTab = tab._props.name
     },
     tableRowClassName ({ row, rowIndex }) {
       if (rowIndex === 1) {
@@ -445,17 +369,50 @@ export default {
       }
       return ''
     },
-    handleEdit (index, row) {
+    async handleEdit (index, row) {
       console.log(index, row)
+      console.log('activeTab: ', this.activeTab)
+      this.$message({
+        type: 'info',
+        message: '正前往编辑页面'
+      })
+      this.activeTab = 'addBlog'
+      const blogDetail = await blogAPi.getBlogDetail(row.id)
+      console.log('blog detail: ', blogDetail)
+      this.blogForm = {
+        ...blogDetail
+      }
     },
     handleDelete (index, row) {
       console.log(index, row)
+    },
+    handleSetting (index, row) {
+      this.openDrawer = true
     },
     handlePageSizeChange (val) {
       console.log(val)
     },
     handlePageNumChange (val) {
       console.log(val)
+    },
+    submitOrUpdateBlog (type) {
+      console.log('hello world')
+      this.$confirm('立即前往文章列表页?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '提交成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '操作已取消'
+        })
+      })
     }
   }
 }
@@ -474,7 +431,6 @@ export default {
     min-height: 700px;
   }
   .button-new-tag {
-    margin-left: 10px;
     height: 32px;
     line-height: 30px;
     padding-top: 0;
@@ -482,7 +438,34 @@ export default {
   }
   .input-new-tag {
     width: 90px;
-    margin-left: 10px;
     vertical-align: bottom;
+  }
+  .drawer-content {
+    padding: 20px 20px;
+    height: 100%;
+  }
+  .drawer-content .drawer-footer {
+    display: block;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+  }
+  .drawer-content .draw-tags {
+    margin-top: -20px;
+    margin-bottom: 20px;
+    display: block;
+    & > label {
+      text-align: right;
+      vertical-align: middle;
+      float: left;
+      font-size: 14px;
+      width: 50px;
+      color: #606266;
+      line-height: 40px;
+      padding: 0 12px 0 0;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
   }
 </style>
