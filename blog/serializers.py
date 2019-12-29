@@ -6,6 +6,7 @@ Created on 2019/11/17 下午6:08
 @Blog: https://blog.csdn.net/huangqiang1363
 """
 import json
+import logging
 import traceback
 
 from rest_framework import serializers
@@ -13,6 +14,8 @@ from rest_framework.utils import model_meta
 from django.utils.translation import ugettext_lazy as _
 
 from models import Blog, Category, Tag, Comment
+
+logger = logging.getLogger(__name__)
 
 
 class JsonSerializer(serializers.JSONField):
@@ -123,4 +126,6 @@ class BlogSerializer(BaseSerializer):
 
     @staticmethod
     def get_comments(obj):
-        return "not implements"
+        comments = obj.comments.all()
+        # get comment list, but not tree structure
+        return CommentSerializer(comments, many=True).data

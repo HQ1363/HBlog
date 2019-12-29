@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
 
 from comm.utils.common import json_loads
@@ -20,6 +22,17 @@ class JSONField(models.TextField):
 
 
 # Create your models here.
+class UserProfile(models.Model):
+    """ 扩展user表字段 """
+    user = models.OneToOneField(User)
+
+    def __str__(self):
+        return self.user.username
+
+    def __unicode__(self):
+        return self.user.username
+
+
 class ModelBase(models.Model):
     """ the model base """
     id = models.AutoField(primary_key=True)
@@ -55,11 +68,25 @@ class Tag(ModelBase):
 
 class Blog(ModelBase):
     """ 博文 """
+    STATUS_DRAFT = 1
+    STATUS_PUBLISH = 2
+    STATUS_OFFLINE = 3
+
+    STATUS_TEXT = {
+        STATUS_DRAFT: '草稿箱',
+        STATUS_PUBLISH: '发布中',
+        STATUS_OFFLINE: '已下线'
+    }
+
     title = models.CharField(verbose_name='标题', max_length=80)
     author = models.CharField(verbose_name='作者', max_length=32)
     content = models.TextField(verbose_name='博客正文')
-    category = models.ForeignKey(Category, verbose_name='分类')
+    categories = models.ManyToManyField(Category, verbose_name='分类')
     tags = models.ManyToManyField(Tag, verbose_name='标签')
+    status = models.SmallIntegerField(verbose_name='状态', default=STATUS_PUBLISH)
+    commentable = models.BooleanField(verbose_name='可评论', default=True)
+    summary = models.CharField(verbose_name='文章摘要', max_length=2048, null=True)
+    visitors = models.BigIntegerField(verbose_name='访问量', default=0)
 
     class Meta:
         ordering = ('-created_time', )
@@ -74,7 +101,7 @@ class Comment(ModelBase):
     """
     评论
     """
-    blog = models.ForeignKey(Blog, verbose_name='博客')
+    blog = models.ForeignKey(Blog, verbose_name='博客', related_name="comments")
     name = models.CharField(verbose_name='称呼', max_length=64)
     email = models.EmailField(verbose_name='邮箱')
     comment = models.ForeignKey(u'self', related_name=u'comments', verbose_name='评论的评论', null=True)
@@ -89,3 +116,11 @@ class Comment(ModelBase):
         return self.content
 
     __str__ = __unicode__
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+
+post_save.connect(create_user_profile, sender=User)

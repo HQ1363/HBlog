@@ -15,6 +15,9 @@ mysql:
 	mysql -uroot --password="aixocm" -h 127.0.0.1 -e "CREATE DATABASE if not exists HBlog DEFAULT CHARACTER SET utf8"
 	python manage.py makemigrations && python manage.py migrate
 
+migrate:
+	python manage.py makemigrations && python manage.py migrate
+
 depend:
 	@pip freeze > requirements.txt
 
@@ -39,7 +42,7 @@ down:
 logs:
 	docker-compose logs -f
 
-migrate:
+dmigrate:
 	docker-compose exec api sh -c "cd /src && make migrate"
 
 load:

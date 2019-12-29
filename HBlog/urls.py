@@ -20,8 +20,13 @@ from rest_framework.documentation import include_docs_urls
 from django.conf import settings
 from django.conf.urls.static import static
 
+from blog.views import user_login, user_logout, query_user_profile
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^api/user/login$', user_login),
+    url(r'^api/user/logout$', user_logout),
+    url(r'^api/user/profile$', query_user_profile),
     url(r'^api/blog/', include("blog.urls"), name="blog"),
     url(r'^api-docs', include_docs_urls(title=u"HBlog", permission_classes=())),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),

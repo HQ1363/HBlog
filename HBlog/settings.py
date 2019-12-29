@@ -124,6 +124,8 @@ AUTHENTICATION_BACKENDS = (
     'comm.admin_backend.AdminAuthBackend',
 )
 
+AUTH_PROFILE_MODULE = 'blog.UserProfile'
+
 ADMIN_LOGIN = 'admin'
 ADMIN_PASSWORD = 'pbkdf2_sha256$36000$81Cnk3YMWWAn$J5THRPsgxirLbHhkvTV4ui8mCo9+DsjVSvkF3I4mOpg='
 
